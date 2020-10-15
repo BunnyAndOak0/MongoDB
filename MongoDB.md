@@ -207,6 +207,31 @@ fork=true
 
 
 
+### 用户使用
+
+​		mongoDB有一个用户管理机制，也就是说有一个管理用户组，是专门为普通用户设置的，也就是可以称之为管理员。管理员没有数据库的读写权限，只有操作用户的权限，因此只需要赋予userAdminAnyDatabase角色即可。
+
+ ```java
+./mongo
+可以进行客户端的使用
+ ```
+
+1. 查看admin中的用户
+
+   db.system.users.find()函数可以查看admin库中所有用户的信息
+
+2. 添加用户
+
+   ```java
+   >db.createUser({user:"admin",pwd:"admin",roles:[{role:"userAdminAnyDatabase",db:"admin"}]})
+   ```
+
+   管理员账户创建完成后需要重启MongoDB，并且开启验证
+
+   之后就可以查询到admin中的用户
+
+3.  
+
 
 
 

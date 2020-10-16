@@ -230,7 +230,72 @@ fork=true
 
    之后就可以查询到admin中的用户
 
-3.  
+   在默认情况下MongoDB是不开启用户认证的，如果添加用户，就需要开启用户认证机制，通过修改mongodb.conf的配置文件，在文件中修改auth=true即可
+
+    ```java
+   dbpath=/usr/local/mongodb/data/db
+   logpath=/usr/local/mongodb/log/mongodb.log
+   port=27017
+   bind_ip=0.0.0.0
+   fork=true
+   auth=true
+    ```
+
+    进入客户端之后进行验证，否则无法操作数据库
+
+   ```java
+   db.auth("admin", "admin")
+   ```
+
+   返回1就是认证成功，返回0就是验证失败
+
+   
+
+1. 创建普通用户
+
+   普通用户由管理员创建，需要指定操作某个数据库，所以需要先用管理员账户登录数据库
+
+   ```java
+   > use admin
+   > db.auth("admin", "admin")
+   ```
+
+2. 创建数据库
+
+   如果该数据不存在，就会创建数据库
+
+   ```java
+   > use kmust
+   ```
+
+    创建普通用户：
+
+   ```java
+   > db.createUser({user:"user",pwd:"user",roles:[{role:"readWrite",db:"kmust"}]})
+   ```
+
+   需要先认证
+
+   ```jav
+   > db.auth("user","user")
+   1
+   ```
+
+   进行数据插入
+
+   ```java
+   > db.kmust.insert({id:"1000"})
+   WriteResult({ "nInserted" : 1 })
+   ```
+
+   查看
+
+   ```java
+   > db.kmust.find()
+   { "_id" : ObjectId("5f88e81d1715172f1469f34a"), "id" : "1000" }
+   ```
+
+   
 
 
 

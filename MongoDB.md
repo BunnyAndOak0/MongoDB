@@ -295,6 +295,213 @@ fork=true
    { "_id" : ObjectId("5f88e81d1715172f1469f34a"), "id" : "1000" }
    ```
 
+5.更新用户角色
+
+   ​		可以使用db.updateUser()函数来更新用户角色，该函数当前用户具有**userAdminDatabase**或者更高的权限。
+
+   更新用户必须是在用户所在库下面进行更新
+
+   ```java
+   > db.updateUser("kmust",{roles:[{"role":"userAdminAnyDatabase","db":"kmust"},{"role":"dbAdminAnyDatabase","db":"kmust"}]})
+   ```
+
+   通过show users命令查看用户的角色发生的变化
+
+6.用户更新密码
+
+无论用哪种方式都需要使用管理员的用户进行更新
+
+需要切换到指定的库
+
+1. 使用db.updateUser()函数更新密码--->可以更新除了密码之外的其他信息
+
+   ```java
+   > db.updateUser("admin",{"pwd":"123456"})
+   ```
+
+   ```java
+   > db.auth("admin","admin")
+   Error: Authentication failed.
+   0
+   > db.auth("admin","123456")
+   1
+   ```
+
+   
+
+   
+
+2. 使用db.changeUserPassword()函数更新密码--->只能更新用户密码
+
+   ```java
+   > db.changeUserPassword("user","user")
+   ```
+
+
+7.删除用户
+
+​		通过db.dropUser()函数可以删除指定的用户，删除成功后可以返回true，在删除用户的时候需要切换到创建用户时所指定的数据库才可以删除。ps:需要使用具有userAdminAnyDatabase的角色管理员用户才可以删除其他用户。
+
+先切换数据库，切换过后再进行删除
+
+```java
+> use kmust
+switched to db kmust
+> db.dropUser("user")
+true
+```
+
+
+
+## MongoDB的数据库操作
+
+### 创建数据库
+
+可以不做用户认证
+
+1. 在MongoDB中创建数据库的命令使用的是use命令，有两层含义：
+
+   a.切换到指定的数据库
+
+   b.如果切换的数据库不存在，就会创建该数据库
+
+   ```java
+   > use kmusttest
+   switched to db kmusttest
+   ```
+
+
+
+### 查看所有数据库
+
+ 		如果开启了用户认证，则需要先登录才可以查看到结果，否则不显示任何信息，如果使用的是**具备数据库管理员角色**的用户，就可以看到**所有的数据库**，如果只是**普通用户登录**，只能**查询到该用户所拥有的数据库**。
+
+ ```java
+> use admin
+switched to db admin
+> db.auth("admin","123456")
+1
+> show dbs
+admin   0.000GB
+config  0.000GB
+kmust   0.000GB
+local   0.000GB
+ ```
+
+**show dbs只显示使用过的数据库**，不显示不含仍型新的数据库
+
+（在那哪个库下面创建的用户，就要在哪个库下面登录）
+
+ ```java
+> use admin
+switched to db admin
+> db.auth("user","user")
+1
+> show dbs
+kmust  0.000GB
+ ```
+
+
+
+### 删除数据库
+
+使用db.dropDatabase()函数来删除数据库，也就是在删除之前需要**使用具备dbAdminAnyDatabase角色的管理员用户登录**，然后**切换到需要删除的数据库**，执行删除函数
+
+ ```java
+> use kmusttest
+switched to db kmusttest
+> db.dropDatabase()
+{
+	"ok" : 0,
+	"errmsg" : "not authorized on kmusttest to execute command { dropDatabase: 1.0, lsid: { id: UUID(\"ec14c347-94a8-472c-9d08-f2ba1a5a5481\") }, $db: \"kmusttest\" }",
+	"code" : 13,
+	"codeName" : "Unauthorized"
+}
+ ```
+
+
+
+### MongoDB的集合操作
+
+集合对应的也就是关系型数据库里面的表
+
+1. 创建集合
+
+   MongoDB使用db.createCollection()函数来创建集合
+
+   语法：db.createCollection(name,options)
+
+   name：要创建的集合的名称
+
+   options：可选参数，指定有关内存的大小以及索引的选项
+
+   option可以是如下参数：
+
+|    字段     | 类型 |                             描述                             |
+| :---------: | :--: | :----------------------------------------------------------: |
+|   capped    | 布尔 | （可选）如果位true，则创建固定集合，固定集合是指有着固定大小的集合，当达到最大的时候，会自动覆盖最早的文档，为true的时候，必须指定size参数 |
+| autoindexid | 布尔 |    （可选）如果为true，自动在_id字段创建索引，默认为false    |
+|    size     | 数值 | （可选）为固定集合指定一个最大值（以字节计）。如果capped为true，也需要指定该字段 |
+|     max     | 数值 |            （可选）指固定集合中包含文档的最大数量            |
+
+
+
+**使用默认集合**
+
+​		在MongoDB中，也可以不用创建集合，当插入一些数据的时候，会自动创建集合，并且会使用数据库的名字作为集合的名字。
+
+```java
+> use admin
+switched to db admin
+> db.auth("admin","123456")
+1
+> use develop
+switched to db develop
+> db.createUser({user:"bunny",pwd:"bunny",roles:[{role:"readWrite",db:"develop"}]}
+```
+
+切换并登录
+
+```java
+> use develop
+switched to db develop
+> db.auth("bunny","bunny")
+1
+```
+
+插入数据：
+
+使用insert()函数，必须给定集合名字，如果没有给集合名字会创建一个和数据库相同名字的集合
+
+```java
+> db.develop.insert({bunnyId:"bunny1"})
+WriteResult({ "nInserted" : 1 })
+> show collections
+develop
+```
+
+1. 创建不带参数的集合
+
+    如果开启了权限验证，需要使用具有数据库管理员权限的用户来创建集合。
+
+    ```java
+   > use develop
+   switched to db develop
+   > db.createCollection("dev")
+    ```
+
+   
+
+   
+
+2. 创建带参数的集合
+
+    ```java
+   > db.createCollection("dev2",{capped:true,autoIndexId:true,size:2000000,max:1000})
+    ```
+
+   
+
    
 
 
@@ -317,23 +524,11 @@ fork=true
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-+++
+***
 
 Tips：
 
-```jav
+```java
 ps aux | grep mongodb
 可以查看当前mongodb的启动状态
 ```

@@ -488,7 +488,7 @@ develop
    > use develop
    switched to db develop
    > db.createCollection("dev")
-    ```
+   ```
 
    
 
@@ -498,11 +498,229 @@ develop
 
     ```java
    > db.createCollection("dev2",{capped:true,autoIndexId:true,size:2000000,max:1000})
-    ```
+   ```
 
-   
 
-   
+
+
+**查看集合**
+
+使用show collections或者show tables命令
+
+```java
+> use develop
+switched to db develop
+> db.auth("bunny","bunny")
+1
+> show collections
+develop
+```
+
+```java
+> show tables
+develop
+```
+
+
+
+#### 删除集合
+
+需要先切换到删除集合所在的数据库，使用drop()函数删除集合即可。
+
+```java
+> db.develop.drop()
+true
+```
+
+
+
+### MongoDB的文档操作
+
+​		其实指的就是数据，MongoDB中的文档的数据结构和JSON基本一样，所有存储在集合中的数据都是BSON格式，BSON就是一种类似JSON的二进制形式的存储格式，是Binary JSON的简称。
+
+#### 插入文档
+
+1. 插入单个文档
+
+   1. insert函数
+
+      ```java
+      > db.dev.insert({totle:"测试mongo文档插入",decription:"测试",url:"www.baidu.com",tag:["java","python","大数据"]})
+      WriteResult({ "nInserted" : 1 })
+      ```
+
+      查看文档数据
+
+      ```java
+      > db.dev.find()
+      { "_id" : ObjectId("5f911c88b4981255db0d1fd8"), "totle" : "测试mongo文档插入", "decription" : "测试", "url" : "www.baidu.com", "tag" : [ "java", "python", "大数据" ] }
+      ```
+
+   2. save函数
+
+      ```java
+      > db.dev.save({title:"save测试",decription:"save",url:"www.baidu.com",tag:["java","python","web"]})
+      WriteResult({ "nInserted" : 1 })
+      ```
+
+      查看数据
+
+      ```java
+      > db.dev.find()
+      { "_id" : ObjectId("5f911c88b4981255db0d1fd8"), "totle" : "测试mongo文档插入", "decription" : "测试", "url" : "www.baidu.com", "tag" : [ "java", "python", "大数据" ] }
+      { "_id" : ObjectId("5f911d1bb4981255db0d1fd9"), "title" : "save测试", "decription" : "save", "url" : "www.baidu.com", "tag" : [ "java", "python", "web" ] }
+      ```
+
+   3. insertOne函数
+
+      在MongoDB3.2之后的版本中，提供了insertOne()函数用于插入文档
+
+      ```java
+      > db.dev.insertOne({title:"insertOne测试",description:"insertOne",url:"www.baidu.com",tag:["go","web",".net"]})
+      {
+      	"acknowledged" : true,
+      	"insertedId" : ObjectId("5f911dfab4981255db0d1fda")
+      }
+      ```
+
+      查看数据
+
+      ```java
+      > db.dev.find()
+      { "_id" : ObjectId("5f911c88b4981255db0d1fd8"), "totle" : "测试mongo文档插入", "decription" : "测试", "url" : "www.baidu.com", "tag" : [ "java", "python", "大数据" ] }
+      { "_id" : ObjectId("5f911d1bb4981255db0d1fd9"), "title" : "save测试", "decription" : "save", "url" : "www.baidu.com", "tag" : [ "java", "python", "web" ] }
+      { "_id" : ObjectId("5f911dfab4981255db0d1fda"), "title" : "insertOne测试", "description" : "insertOne", "url" : "www.baidu.com", "tag" : [ "go", "web", ".net" ] }
+      ```
+
+      insertOne和其他两个返回的插入结果是不一样的，会返回成功还是失败
+
+      
+
+2. 插入多个文档
+
+   1. insert或者save函数
+
+      ```java
+      > db.dev.insert([{title:"java",tags:["javase","javaee","javame"]},{title:"orm",tags:["mybatis","hibernate"]},{title:"springmvc",tags:["springboot","springcloud"]}])
+      BulkWriteResult({
+      	"writeErrors" : [ ],
+      	"writeConcernErrors" : [ ],
+      	"nInserted" : 3,
+      	"nUpserted" : 0,
+      	"nMatched" : 0,
+      	"nModified" : 0,
+      	"nRemoved" : 0,
+      	"upserted" : [ ]
+      })
+      ```
+
+      save也是同样的用法
+
+      查询数据
+
+      ```java
+      > db.dev.find()
+      { "_id" : ObjectId("5f911c88b4981255db0d1fd8"), "totle" : "测试mongo文档插入", "decription" : "测试", "url" : "www.baidu.com", "tag" : [ "java", "python", "大数据" ] }
+      { "_id" : ObjectId("5f911d1bb4981255db0d1fd9"), "title" : "save测试", "decription" : "save", "url" : "www.baidu.com", "tag" : [ "java", "python", "web" ] }
+      { "_id" : ObjectId("5f911dfab4981255db0d1fda"), "title" : "insertOne测试", "description" : "insertOne", "url" : "www.baidu.com", "tag" : [ "go", "web", ".net" ] }
+      { "_id" : ObjectId("5f914ce4b4981255db0d1fdb"), "title" : "java", "tags" : [ "javase", "javaee", "javame" ] }
+      { "_id" : ObjectId("5f914ce4b4981255db0d1fdc"), "title" : "orm", "tags" : [ "mybatis", "hibernate" ] }
+      { "_id" : ObjectId("5f914ce4b4981255db0d1fdd"), "title" : "springmvc", "tags" : [ "springboot", "springcloud" ] }
+      ```
+
+      
+
+   2. insertMany()函数
+
+      在MongoDB3.2之后的版本中提供
+
+      ```java
+      > db.dev.insertMany([{title:"web",tag:["jsp","servelt"]},{title:"rpc",tags:["rmi","dubbo"]},{title:"databse",tags:["oracle","mysql"]}])
+      {
+      	"acknowledged" : true,
+      	"insertedIds" : [
+      		ObjectId("5f914e3eb4981255db0d1fde"),
+      		ObjectId("5f914e3eb4981255db0d1fdf"),
+      		ObjectId("5f914e3eb4981255db0d1fe0")
+      	]
+      }
+      ```
+
+      返回值和insert不同
+
+      ```java
+      > db.dev.find()
+      { "_id" : ObjectId("5f911c88b4981255db0d1fd8"), "totle" : "测试mongo文档插入", "decription" : "测试", "url" : "www.baidu.com", "tag" : [ "java", "python", "大数据" ] }
+      { "_id" : ObjectId("5f911d1bb4981255db0d1fd9"), "title" : "save测试", "decription" : "save", "url" : "www.baidu.com", "tag" : [ "java", "python", "web" ] }
+      { "_id" : ObjectId("5f911dfab4981255db0d1fda"), "title" : "insertOne测试", "description" : "insertOne", "url" : "www.baidu.com", "tag" : [ "go", "web", ".net" ] }
+      { "_id" : ObjectId("5f914ce4b4981255db0d1fdb"), "title" : "java", "tags" : [ "javase", "javaee", "javame" ] }
+      { "_id" : ObjectId("5f914ce4b4981255db0d1fdc"), "title" : "orm", "tags" : [ "mybatis", "hibernate" ] }
+      { "_id" : ObjectId("5f914ce4b4981255db0d1fdd"), "title" : "springmvc", "tags" : [ "springboot", "springcloud" ] }
+      { "_id" : ObjectId("5f914e3eb4981255db0d1fde"), "title" : "web", "tag" : [ "jsp", "servelt" ] }
+      { "_id" : ObjectId("5f914e3eb4981255db0d1fdf"), "title" : "rpc", "tags" : [ "rmi", "dubbo" ] }
+      { "_id" : ObjectId("5f914e3eb4981255db0d1fe0"), "title" : "databse", "tags" : [ "oracle", "mysql" ] }
+      ```
+
+3. 通过变量插入文档
+
+   Mongo Shell工具允许我们定义变量，所有的变量类型为var类型，也可以忽略变量类型。**变量存在缓存中**，只在当前有效，如果重启客户端就会消失。
+
+   1. 通过变量插入单个文档
+
+      ```java
+      > document=({title:"springcloud", tags:["spring cloud netfilx","spring cloud security","spring cloud consul"]})
+      {
+      	"title" : "springcloud",
+      	"tags" : [
+      		"spring cloud netfilx",
+      		"spring cloud security",
+      		"spring cloud consul"
+      	]
+      }
+      ```
+
+   2. 通过变量插入多个文档
+
+       ```java
+      > docu=([{title:"spring data",tags:["spring data redis","spring datemongodb"]},{title:"spring security",tags:["spring security oauth","spring security saml"]},{title:"spring session",tags:["spring sesison mongodb"]}])
+      [
+      	{
+      		"title" : "spring data",
+      		"tags" : [
+      			"spring data redis",
+      			"spring datemongodb"
+      		]
+      	},
+      	{
+      		"title" : "spring security",
+      		"tags" : [
+      			"spring security oauth",
+      			"spring security saml"
+      		]
+      	},
+      	{
+      		"title" : "spring session",
+      		"tags" : [
+      			"spring sesison mongodb"
+      		]
+      	}
+      ]
+      > db.dev.insert(docu)
+      BulkWriteResult({
+      	"writeErrors" : [ ],
+      	"writeConcernErrors" : [ ],
+      	"nInserted" : 3,
+      	"nUpserted" : 0,
+      	"nMatched" : 0,
+      	"nModified" : 0,
+      	"nRemoved" : 0,
+      	"upserted" : [ ]
+      })
+       ```
+
+      **所声明的变量只是在当前有效**，再次启动变量就会没有，因为是存在缓存中
+
+4. 
 
 
 

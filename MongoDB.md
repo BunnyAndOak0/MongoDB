@@ -716,11 +716,426 @@ true
       	"nRemoved" : 0,
       	"upserted" : [ ]
       })
-       ```
+      ```
 
       **所声明的变量只是在当前有效**，再次启动变量就会没有，因为是存在缓存中
 
 4. 
+
+
+
+
+
+#### 删除集合中的所有文档
+
+1. 使用ermove函数删除集合中的所有文档
+
+   ```java
+   > db.dev.remove({})
+   ```
+
+2. 使用deleteMany函数删除所有文档
+
+   ```java
+   > db.dev.deleteMany({})
+   ```
+
+#### 查询文档
+
+1. find()函数
+
+   使用find()函数查询文档
+
+   find({查询条件(可选)}，{指定投影的键(可选)})
+
+   如果没有给定参数则表示查询所有数据
+
+   pretty()函数可以使用格式化的方式来显示所有文档
+
+   ```java
+   > db.dev.find().pretty()
+   {
+   	"_id" : ObjectId("5f911c88b4981255db0d1fd8"),
+   	"totle" : "测试mongo文档插入",
+   	"decription" : "测试",
+   	"url" : "www.baidu.com",
+   	"tag" : [
+   		"java",
+   		"python",
+   		"大数据"
+   	]
+   }
+   ```
+
+   查询想要的文档
+
+   ```java
+   > db.dev.find({title:"dev"}).pretty()
+   {
+   	"_id" : ObjectId("5f95448e5cf5404067a22cbd"),
+   	"title" : "dev",
+   	"desc" : "test1"
+   }
+   {
+   	"_id" : ObjectId("5f9544915cf5404067a22cbe"),
+   	"title" : "dev",
+   	"desc" : "test2"
+   }
+   {
+   	"_id" : ObjectId("5f9544945cf5404067a22cbf"),
+   	"title" : "dev",
+   	"desc" : "test3"
+   }
+   ```
+
+2. findOne()函数
+
+   findOne()函数只返回满足条件的第一条数据，如果没有做投影操作该方法则自带格式化功能，做投影的话就不带格式化功能。
+
+   findOne({查询条件(可选)}，{投影操作(可选)})
+
+   ```java
+   > db.dev.findOne() 
+   {
+   	"_id" : ObjectId("5f911c88b4981255db0d1fd8"),
+   	"totle" : "测试mongo文档插入",
+   	"decription" : "测试",
+   	"url" : "www.baidu.com",
+   	"tag" : [
+   		"java",
+   		"python",
+   		"大数据"
+   	]
+   }
+   ```
+
+   给定条件也只查询第一条
+
+   ```java
+   > db.dev.findOne({title:"dev"})
+   {
+   	"_id" : ObjectId("5f95448e5cf5404067a22cbd"),
+   	"title" : "dev",
+   	"desc" : "test1"
+   }
+   ```
+
+3. 模糊查询
+
+   可以使用//与^$实现模糊查询，使用模糊查询的时候查询条件**不能放到双引号或者单引号中**
+
+   ```java
+   > db.dev.find({title:/e/})
+   { "_id" : ObjectId("5f911d1bb4981255db0d1fd9"), "title" : "save测试", "decription" : "save", "url" : "www.baidu.com", "tag" : [ "java", "python", "web" ] }
+   { "_id" : ObjectId("5f911dfab4981255db0d1fda"), "title" : "insertOne测试", "description" : "insertOne", "url" : "www.baidu.com", "tag" : [ "go", "web", ".net" ] }
+   ```
+
+   使用^表示起始位置，查询文档中title的值以d开头的内容。
+
+   ```java
+   > db.dev.find({title:/^d/})
+   { "_id" : ObjectId("5f914e3eb4981255db0d1fe0"), "title" : "databse", "tags" : [ "oracle", "mysql" ] }
+   { "_id" : ObjectId("5f95448e5cf5404067a22cbd"), "title" : "dev", "desc" : "test1" }
+   { "_id" : ObjectId("5f9544915cf5404067a22cbe"), "title" : "dev", "desc" : "test2" }
+   { "_id" : ObjectId("5f9544945cf5404067a22cbf"), "title" : "dev", "desc" : "test3" }
+   ```
+
+   使用$表示结尾位置，查询文档中title的值
+
+   ```java
+   > db.dev.find({title:/v$/})
+   { "_id" : ObjectId("5f95448e5cf5404067a22cbd"), "title" : "dev", "desc" : "test1" }
+   { "_id" : ObjectId("5f9544915cf5404067a22cbe"), "title" : "dev", "desc" : "test2" }
+   { "_id" : ObjectId("5f9544945cf5404067a22cbf"), "title" : "dev", "desc" : "test3" }
+   ```
+
+#### 投影操作
+
+1. find()函数投影操作
+
+   在find函数中可以指定投影键
+
+   对查询到的内容做key的选择
+
+   1表示显示，0表示不显示，默认是显示
+
+   ```java
+   > db.dev.find({},{title:1})
+   { "_id" : ObjectId("5f911c88b4981255db0d1fd8") }
+   { "_id" : ObjectId("5f911d1bb4981255db0d1fd9"), "title" : "save测试" }
+   { "_id" : ObjectId("5f911dfab4981255db0d1fda"), "title" : "insertOne测试" }
+   ```
+
+   id默认是会显示出来的
+
+   指定不显示
+
+   ```java
+   > db.dev.find({},{title:1,_id:0})
+   {  }
+   { "title" : "save测试" }
+   { "title" : "insertOne测试" }
+   { "title" : "java" }
+   { "title" : "orm" }
+   { "title" : "springmvc" }
+   { "title" : "web" }
+   ```
+
+2. findOne()函数操作投影
+
+   与find()函数相同
+
+   
+
+#### 条件操作符
+
+条件操作符用于比较两个表达式并且从mongoDB集合中获取数据。
+
+1. $gt
+
+   大于操作符
+
+   ```java
+   > db.dev2.find({size:{$gt:300}})
+   { "_id" : ObjectId("5f954abd5cf5404067a22cc3"), "title" : "test4", "size" : 400 }
+   { "_id" : ObjectId("5f954ac45cf5404067a22cc4"), "title" : "test5", "size" : 500 }
+   ```
+
+2. $lt
+
+   小于操作符
+
+   ```java
+   > db.dev2.find({size:{$lt:400}})
+   { "_id" : ObjectId("5f954aa65cf5404067a22cc0"), "title" : "test1", "size" : 200 }
+   { "_id" : ObjectId("5f954ab05cf5404067a22cc1"), "title" : "test2", "size" : 200 }
+   { "_id" : ObjectId("5f954ab55cf5404067a22cc2"), "title" : "test3", "size" : 300 }
+   ```
+
+3. $gte
+
+   大于等于可以对数字或者日期进行判断
+
+    ```java
+   > db.dev2.find({size:{$gte:300}})
+   { "_id" : ObjectId("5f954ab55cf5404067a22cc2"), "title" : "test3", "size" : 300 }
+   { "_id" : ObjectId("5f954abd5cf5404067a22cc3"), "title" : "test4", "size" : 400 }
+   { "_id" : ObjectId("5f954ac45cf5404067a22cc4"), "title" : "test5", "size" : 500 }
+    ```
+
+   
+
+4. $lte
+
+   小于等于
+
+   ```java
+   > db.dev2.find({size:{$lte:300}})
+   { "_id" : ObjectId("5f954aa65cf5404067a22cc0"), "title" : "test1", "size" : 200 }
+   { "_id" : ObjectId("5f954ab05cf5404067a22cc1"), "title" : "test2", "size" : 200 }
+   { "_id" : ObjectId("5f954ab55cf5404067a22cc2"), "title" : "test3", "size" : 300 }
+   ```
+
+5. $eq
+
+   ==等于操作符，做相等的条件判断
+
+   ```java
+   > db.dev2.find({size:{$eq:300}})
+   { "_id" : ObjectId("5f954ab55cf5404067a22cc2"), "title" : "test3", "size" : 300 }
+   ```
+
+   
+
+6. $ne
+
+   !=操作符
+
+   ```java
+   > db.dev2.find({size:{$ne:300}})
+   { "_id" : ObjectId("5f924841b937e09074db6ce4"), "title" : "java" }
+   { "_id" : ObjectId("5f924a16b937e09074db6ce5"), "title" : "dev2", "size" : "500", "num" : 1 }
+   { "_id" : ObjectId("5f92c3c7b937e09074db6ce9"), "title" : "hhh", "desc" : "test3" }
+   { "_id" : ObjectId("5f92c3cab937e09074db6cea"), "title" : "hhh", "desc" : "test4" }
+   { "_id" : ObjectId("5f92c51fb937e09074db6ceb"), "title" : "hhh", "desc" : "test5" }
+   { "_id" : ObjectId("5f954aa65cf5404067a22cc0"), "title" : "test1", "size" : 200 }
+   { "_id" : ObjectId("5f954ab05cf5404067a22cc1"), "title" : "test2", "size" : 200 }
+   { "_id" : ObjectId("5f954abd5cf5404067a22cc3"), "title" : "test4", "size" : 400 }
+   { "_id" : ObjectId("5f954ac45cf5404067a22cc4"), "title" : "test5", "size" : 500 }
+   ```
+
+7. $and
+
+   使用$and操作符来表示多条件间的并且关系
+
+   条件之间的关系默认为and关系,，同一个属性的不同判断
+
+   ```java
+   > db.dev2.find({size:{$gt:200,$lt:500}})
+   { "_id" : ObjectId("5f954ab55cf5404067a22cc2"), "title" : "test3", "size" : 300 }
+   { "_id" : ObjectId("5f954abd5cf5404067a22cc3"), "title" : "test4", "size" : 400 }
+   ```
+
+   使用$and指定
+
+   ```java
+   > db.dev2.find({$and:[{size:{$gt:300}},{size:{$lt:500}}]})
+   { "_id" : ObjectId("5f954abd5cf5404067a22cc3"), "title" : "test4", "size" : 400 }
+   
+   > db.dev2.find({$and:[{title:"test4"},{size:400}]})
+   { "_id" : ObjectId("5f954abd5cf5404067a22cc3"), "title" : "test4", "size" : 400 }
+   ```
+
+   
+
+8. $or
+
+   表示多条关系间的或者关系
+
+   查询title为test2或者size大于300的文档
+
+   ```java
+   > db.dev2.find({$or:[{title:"test2"},{size:{$gt:300}}]})
+   { "_id" : ObjectId("5f954ab05cf5404067a22cc1"), "title" : "test2", "size" : 200 }
+   { "_id" : ObjectId("5f954abd5cf5404067a22cc3"), "title" : "test4", "size" : 400 }
+   { "_id" : ObjectId("5f954ac45cf5404067a22cc4"), "title" : "test5", "size" : 500 }
+   ```
+
+9. $and与$or联合使用
+
+   ```java
+   > db.dev2.find({$or:[{$and:[{title:{$eq:"test5"}},{size:500}]},{size:{$lt:400}}]})
+   { "_id" : ObjectId("5f954aa65cf5404067a22cc0"), "title" : "test1", "size" : 200 }
+   { "_id" : ObjectId("5f954ab05cf5404067a22cc1"), "title" : "test2", "size" : 200 }
+   { "_id" : ObjectId("5f954ab55cf5404067a22cc2"), "title" : "test3", "size" : 300 }
+   { "_id" : ObjectId("5f954ac45cf5404067a22cc4"), "title" : "test5", "size" : 500 }
+   ```
+
+10. $type操作符
+
+    基于BSON类型来检查集合中匹配的数据类型并返回结果
+
+     ```java
+    > db.dev2.find({title:{$type:"number"}})
+    { "_id" : ObjectId("5f955a675cf5404067a22cc5"), "title" : 100, "size" : 400 }
+     ```
+
+    
+
+#### Limit函数和Skip函数
+
+1. Limit函数
+
+   可以决定获取满足条件的记录数量
+
+   ```java
+   > db.dev2.find({},{title:1}).limit(3)
+   { "_id" : ObjectId("5f924841b937e09074db6ce4"), "title" : "java" }
+   { "_id" : ObjectId("5f924a16b937e09074db6ce5"), "title" : "dev2" }
+   { "_id" : ObjectId("5f92c3c7b937e09074db6ce9"), "title" : "hhh" }
+   ```
+
+2. Skip函数
+
+   跳过指定数据量的数据，决定从第几条开始取
+
+   ```java
+   > db.dev2.find({},{title:1}).skip(3).limit(2)
+   { "_id" : ObjectId("5f92c3cab937e09074db6cea"), "title" : "hhh" }
+   { "_id" : ObjectId("5f92c51fb937e09074db6ceb"), "title" : "hhh" }
+   ```
+
+   limit()和skip()的顺序可以不同
+
+   可以使用skip函数与limit函数实现MongoDB的分页查询，但是官方不推荐这种方法，因为会扫描全部文档然后返回结果，效率过低
+
+#### MongoDB排序
+
+使用sort()函数来对查询到的文档进行排序额，sort()函数可以通过参数指定排序的字段，并使用1和-1来指定排序的方式，**1为升序排列，-1用于降序排列**
+
+1. 升序排序
+
+    ```java
+   > db.dev2.find({size:{$type:"number"}},{title:1,size:1,_id:0}).sort({size:1})
+   { "title" : "test1", "size" : 200 }
+   { "title" : "test2", "size" : 200 }
+   { "title" : "test3", "size" : 300 }
+   { "title" : "test4", "size" : 400 }
+   { "title" : 100, "size" : 400 }
+   { "title" : "test5", "size" : 500 }
+    ```
+
+2. 降序排列
+
+   ```java
+   > db.dev2.find({size:{$type:"number"}},{title:1,size:1,_id:0}).sort({size:-1})
+   { "title" : "test5", "size" : 500 }
+   { "title" : "test4", "size" : 400 }
+   { "title" : 100, "size" : 400 }
+   { "title" : "test3", "size" : 300 }
+   { "title" : "test1", "size" : 200 }
+   { "title" : "test2", "size" : 200 }
+   ```
+
+   
+
+### 索引
+
+1. 创建索引
+
+   在MongoDB中会自动为文档的_id（文档的主键）键创建索引，与关系型数据的主键索引类似。
+
+   使用createIndex()函数来为其他的键创建索引，在创建索引的时候需要按照指定的排序规则。1按照升序规则创建索引，-1按照降序规则创建索引。
+
+   ​    db.COLLECTINO_NAME.createIndex({创建索引的键：排序规则，......}，{创建索引的参数(可选参数)})
+
+   在创建索引时，需要使用具有dbAdmin或者dbAdminAnyDatabase角色的用户。 
+
+   参数说明
+
+   |          参数           | 数据类型 | 默认值 |                             功能                             |
+   | :---------------------: | :------: | :----: | :----------------------------------------------------------: |
+   |       background        | Boolean  | false  |             后台建立索引时不阻止其他数据库的活动             |
+   |         unique          |  Boolea  | false  |                         创建唯一索引                         |
+   |          name           |  String  |        | 指定索引名称，如果未指定，MongoDB会生成一个索引字段的名称和排序顺序串联 |
+   | partialFilterExpression | document |        |            如果指定Mongo指挥满足过滤表达式的记录             |
+   |         sparse          | Boolean  | false  |             对文档中的不存在的字段数据不启用索引             |
+   |   expireAfterSeconds    | Integer  |        |                      指定索引的过期时间                      |
+   |      stoageEngine       |          |        |          document类型允许用户配置索引的额外存储引擎          |
+
+   ```java
+   > db.dev2.createIndex({title:1},{background:true})
+   ```
+
+2. 查看索引
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

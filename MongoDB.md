@@ -1063,7 +1063,7 @@ true
    { "title" : "test4", "size" : 400 }
    { "title" : 100, "size" : 400 }
    { "title" : "test5", "size" : 500 }
-    ```
+   ```
 
 2. 降序排列
 
@@ -1109,17 +1109,57 @@ true
 
 2. 查看索引
 
+   使用getIndexes()或者getIndexSpecs()函数查看集合中所有索引的信息
+   
+   ```java
+   > db.dev2.getIndexse()
+   ```
+   
+3. 查看索引键
+
+   getIndexKeys()函数来查看集合的索引键
+
+   ```java
+   > db.dev.getIndexKeys()
+   ```
+
+4. 查看索引大小
+
+   通过totalIndexSize()函数查看当前集合中索引的大小，单位为字节
+
+   db.COLLECTION_NAME.totalIndexSize([detail]`(`可选参数`)`)
+
+   detail可选参数，传入除了0或者false以外的任意数据，就会显示该集合中每个索引的大小以及集合中索引的总大小，如果传入0或者是false则只显示该集合中所有索引的总大小，默认值为false
+
+   ```java
+   > db.dev.totalIndexSize([1])
+   ```
+
+5. 修改索引
+
+   MongoDB没有单独的修改索引函数，如果要修改某个索引，需要先删除旧的索引，再创建新的索引
+
    
 
+6. 删除索引
 
+   通过dropIndex()函数删除指定的索引
 
+   db.COLLECTION_NAME.dropIndex("索引名称")
 
+7. 删除集合中的全部索引
 
+   使用dropIndexes()函数删除集合中的全部索引，_id键的索引除外
 
+   db.COLLECTION_NAME.dropIndexes()
 
+8.  重建索引
 
+   可以使用reIndex()函数重建索引，重建索引之后可以减少索引的存储空间，减少索引碎片优化索引查询效率，重建索引时删除原索引重新创建的过曾，不建议反复使用。
 
+   db.COLLECTION_NAME.redIndex()
 
+   
 
 
 

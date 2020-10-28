@@ -1139,8 +1139,6 @@ true
 
    MongoDB没有单独的修改索引函数，如果要修改某个索引，需要先删除旧的索引，再创建新的索引
 
-   
-
 6. 删除索引
 
    通过dropIndex()函数删除指定的索引
@@ -1158,6 +1156,84 @@ true
    可以使用reIndex()函数重建索引，重建索引之后可以减少索引的存储空间，减少索引碎片优化索引查询效率，重建索引时删除原索引重新创建的过曾，不建议反复使用。
 
    db.COLLECTION_NAME.redIndex()
+
+9. 复合索引
+
+   针对多个字段联合创建索引，先按照第一个字段排序，第一个字段相同的按照第二个字段拍学，以此类推。
+
+   db.COLLECTION_NAME.createIndex({索引键名:排序规则，索引键名:排序规则,......})
+
+10.  多key索引
+
+    当索引的字段为数组的时候，创建出的索引称为多key索引，多可以索引会为数组的每个元素建立一条索引
+
+    db.COLLECTION_NAME.createIndex({数组键名：排序规则})
+
+    只对数组类型生效
+
+#### 索引的额外属性
+
+1. 唯一属性
+
+   会保证索引对应的键不会出现相同的值，比如id索引就是唯一索引
+
+   db.COLLECTION_NAME.createIndex({索引键名：排序规则},{unique:true})
+
+   如果唯一索引所在的字段有重复的数据写入，抛出异常
+
+2. 部分索引
+
+   只是针对某个符合特定条件的文档建立的索引，3.2版本才支持该特性。
+
+   有较低的存储需求，降低了索引创建和维护的性能要求。简单点说，也就是带有过滤条件的索引，即索引只存在于某些文档之上。
+
+   db.CONNCTION_NAME.createIndex({索引键名：排序规则}，{partFilterExpression:{键名：{匹配条件：条件值}}})
+
+   ```java
+   > db.dev.createIndex({size:1},{partialFilterExpression:{size:{$gt:300}}})
+   {
+   	"createdCollectionAutomatically" : false,
+   	"numIndexesBefore" : 1,
+   	"numIndexesAfter" : 2,
+   	"ok" : 1
+   }
+   ```
+
+   查看索引
+
+   ```java
+   > db.dev.getIndexes()
+   [
+   	{
+   		"v" : 2,
+   		"key" : {
+   			"_id" : 1
+   		},
+   		"name" : "_id_",
+   		"ns" : "develop.dev"
+   	},
+   	{
+   		"v" : 2,
+   		"key" : {
+   			"size" : 1
+   		},
+   		"name" : "size_1",
+   		"ns" : "develop.dev",
+   		"partialFilterExpression" : {
+   			"size" : {
+   				"$gt" : 300
+   			}
+   		}
+   	}
+   ]
+   ```
+
+   如果即制定了partiFilterExpression和唯一约束，那么唯一约束只适用于满足筛选条件的文档，具有唯一约束的部分索引，不会阻止不符合唯一约束且不符合过滤条件的文档的插入。
+
+3. 覆盖索引查询
+
+   1. 所有的查询字段是索引的一部分
+   2. 所有的查询返回字段再同一个索引中
 
    
 

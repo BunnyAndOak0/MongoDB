@@ -1467,7 +1467,57 @@ i，m，x，s可以组合使用
    { "_id" : null, "sizeAvg" : 333.3333333333333 }
    ```
 
-   
+6. 统计结果返回-$push
+
+   查询dev2集合，按照size分组并返回title，如果size相同，则使用数组返回他们的title，
+
+   ```java
+   > db.dev2.aggregate([{$group:{_id:"$size",titleArray:{$push:"$title"}}}])
+   { "_id" : 500, "titleArray" : [ "test5" ] }
+   { "_id" : null, "titleArray" : [ "java", "hhh", "hhh", "hhh" ] }
+   { "_id" : 400, "titleArray" : [ "test4", 100 ] }
+   { "_id" : "500", "titleArray" : [ "dev2" ] }
+   { "_id" : 200, "titleArray" : [ "test1", "test2" ] }
+   { "_id" : 300, "titleArray" : [ "test3" ] }
+   ```
+
+7. 数组字段拆分-$unwind
+
+   查询集合dev2，将数组中的内容拆分显示
+
+   ```java
+   > db.dev.aggregate([{$unwind:"$tags"}])
+   { "_id" : ObjectId("5f914ce4b4981255db0d1fdb"), "title" : "java", "tags" : "javase" }
+   { "_id" : ObjectId("5f914ce4b4981255db0d1fdb"), "title" : "java", "tags" : "javaee" }
+   ```
+
+8. 管道操作
+
+   将MongDB的文档在一个管道处理完毕后将结果传递给下一个管道处理，管道操作是可以重复的，管道操作是按照书写顺序依次执行的，每个操作符都会接受一连串的文档，，对这些文档做一些类型转换，最后将转换后的文档作为结果传递给下一个操作符（对于最后一个管道操作符，是将结果返回给客户端），成为流式工作方式。
+
+   管道操作符：$match、$group、$rout、$limit、$skip、$unwind
+
+   管道操作符，只能用于计算机当前聚合管道的文档，**不能处理其他的文档**
+
+9. $project
+
+   1. 聚合投影约束
+
+      $project操作符：可以使用$project操作符做聚合投影操作
+
+      查询dev2集合，将数组中的内容拆分显示，并只显示title键和tags键的值
+
+      ```java
+      > db.dev.aggregate([{$unwind:"$tags"},{$project:{_id:0,title:"$title",tags:"$tags"}}])
+      { "title" : "java", "tags" : "javase" }
+      { "title" : "java", "tags" : "javaee" }
+      { "title" : "java", "tags" : "javame" }
+      { "title" : "orm", "tags" : "mybatis" }
+      ```
+
+   2. 字符串处理
+
+      通过MongDB的字符串操作符对投影的内容做字符串的处理
 
 
 

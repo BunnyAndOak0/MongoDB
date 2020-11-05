@@ -1237,11 +1237,237 @@ true
 
    
 
+#### 正则查询
+
+MongDB中查询条件也可以使用正则表达式作为匹配约束
+
+db.COLLECTION_NAME.find(字段名：{正则表达式})
+
+db.COLLECTION_NAME.find({字段名：{$regex:正则表达式，$options:正则选项}});
+
+ 正则表达式格式：/xxx/
+
+正则选项：
+
+i-不区分大小写以及匹配大小写的情况
+
+m-多行查找，如果内容不存在换行符号（例如\n）或者条件上没有（start\end），该选项没有任何效果
+
+x-设置x选项后，正则表达式中的非转义的空白字符将被忽略，需要$regex与options语法
+
+s-允许点字符（即.）匹配包括换行符在内的所有字符，需要$regex与$options语法
+
+i，m，x，s可以组合使用
+
+ 例如：查询集合中以d开头的数据
+
+```java
+> db.dev.find({title:/^d/})
+{ "_id" : ObjectId("5f914e3eb4981255db0d1fe0"), "title" : "databse", "tags" : [ "oracle", "mysql" ] }
+{ "_id" : ObjectId("5f95448e5cf5404067a22cbd"), "title" : "dev", "desc" : "test1" }
+{ "_id" : ObjectId("5f9544915cf5404067a22cbe"), "title" : "dev", "desc" : "test2" }
+{ "_id" : ObjectId("5f9544945cf5404067a22cbf"), "title" : "dev", "desc" : "test3" }
+```
+
+```java
+> db.dev.find({title:{$regex:/^d/}})
+{ "_id" : ObjectId("5f914e3eb4981255db0d1fe0"), "title" : "databse", "tags" : [ "oracle", "mysql" ] }
+{ "_id" : ObjectId("5f95448e5cf5404067a22cbd"), "title" : "dev", "desc" : "test1" }
+{ "_id" : ObjectId("5f9544915cf5404067a22cbe"), "title" : "dev", "desc" : "test2" }
+{ "_id" : ObjectId("5f9544945cf5404067a22cbf"), "title" : "dev", "desc" : "test3" }
+```
+
+结尾
+
+```java
+> db.dev.find({title:/v$/})
+{ "_id" : ObjectId("5f95448e5cf5404067a22cbd"), "title" : "dev", "desc" : "test1" }
+{ "_id" : ObjectId("5f9544915cf5404067a22cbe"), "title" : "dev", "desc" : "test2" }
+{ "_id" : ObjectId("5f9544945cf5404067a22cbf"), "title" : "dev", "desc" : "test3" }
+```
+
+```java
+> db.dev.find({title:{$regex:/v$/}})
+{ "_id" : ObjectId("5f95448e5cf5404067a22cbd"), "title" : "dev", "desc" : "test1" }
+{ "_id" : ObjectId("5f9544915cf5404067a22cbe"), "title" : "dev", "desc" : "test2" }
+{ "_id" : ObjectId("5f9544945cf5404067a22cbf"), "title" : "dev", "desc" : "test3" }
+```
+
+中间包含
+
+```java
+> db.dev.find({title:/e/})
+{ "_id" : ObjectId("5f911d1bb4981255db0d1fd9"), "title" : "save测试", "decription" : "save", "url" : "www.baidu.com", "tag" : [ "java", "python", "web" ] }
+{ "_id" : ObjectId("5f911dfab4981255db0d1fda"), "title" : "insertOne测试", "description" : "insertOne", "url" : "www.baidu.com", "tag" : [ "go", "web", ".net" ] }
+```
+
+(//中间的值不能写成字符串)
+
+正则表达式的写法：
+
+```java
+> db.dev.find({title:{$regex:/e/}})
+{ "_id" : ObjectId("5f911d1bb4981255db0d1fd9"), "title" : "save测试", "decription" : "save", "url" : "www.baidu.com", "tag" : [ "java", "python", "web" ] }
+```
+
+以某字母开头，并且忽略大小写
+
+```java
+> db.dev.find({title:/^s/i})
+{ "_id" : ObjectId("5f911d1bb4981255db0d1fd9"), "title" : "save测试", "decription" : "save", "url" : "www.baidu.com", "tag" : [ "java", "python", "web" ] }
+```
+
+ ```java
+> db.dev.find({title:{$regex:/^s/i}})
+{ "_id" : ObjectId("5f911d1bb4981255db0d1fd9"), "title" : "save测试", "decription" : "save", "url" : "www.baidu.com", "tag" : [ "java", "python", "web" ] }
+ ```
+
+```java
+> db.dev.find({title:{$regex:/^s/,$options:"i"}})
+{ "_id" : ObjectId("5f911d1bb4981255db0d1fd9"), "title" : "save测试", "decription" : "save", "url" : "www.baidu.com", "tag" : [ "java", "python", "web" ] }
+```
+
+（i需要写到双引号或者单引号当中）
+
+以xxx开头，xxx结尾
+
+```java
+> db.dev.find({title:/^d.*v$/})
+{ "_id" : ObjectId("5f95448e5cf5404067a22cbd"), "title" : "dev", "desc" : "test1" }
+{ "_id" : ObjectId("5f9544915cf5404067a22cbe"), "title" : "dev", "desc" : "test2" }
+{ "_id" : ObjectId("5f9544945cf5404067a22cbf"), "title" : "dev", "desc" : "test3" }
+```
+
+使用正则
+
+```java
+> db.dev.find({title:{$regex:/^s.*g$/}})
+{ "_id" : ObjectId("5fa16f9c0387751cba516738"), "title" : "spring" }
+```
+
+查询dev集合中，title字段以d开头或者s开头
+
+```java
+> db.dev.find({title:{$in:[/^d/,/^s/]}})
+{ "_id" : ObjectId("5f911d1bb4981255db0d1fd9"), "title" : "save测试", "decription" : "save", "url" : "www.baidu.com", "tag" : [ "java", "python", "web" ] }
+```
+
+查询dev集合中，title字段不以s开头
+
+```java
+> db.dev.find({title:{$not:/^s/}})
+{ "_id" : ObjectId("5f911c88b4981255db0d1fd8"), "totle" : "测试mongo文档插入", "decription" : "测试", "url" : "www.baidu.com", "tag" : [ "java", "python", "大数据" ] }
+```
+
+不以s或者d开头的（使用**$nin**操作符）
+
+```java
+> db.dev.find({title:{$nin:[/^d/,/^s/]}})
+{ "_id" : ObjectId("5f911c88b4981255db0d1fd8"), "totle" : "测试mongo文档插入", "decription" : "测试", "url" : "www.baidu.com", "tag" : [ "java", "python", "大数据" ] }
+```
 
 
 
+#### 聚合查询
 
+通过aggregate()函数完成后一些聚合函数，可以用于处理一些诸如统计，平均值，求和等，并返回计算后的数据结果。
 
+语法：db.CLLECTION_NAME.aggregated([{$group:{_id:"$分组键名"，"$分组键名"，...，别名：{聚合运算："$运算列"}}}，{条件筛选：{键名:{运算条件：运算值}}}])
+
+常见的mongo的聚合操作和mysql的查询类比
+
+| sql操作/函数 |   mongodb聚合操作   |
+| :----------: | :-----------------: |
+|    where     |       $match        |
+|   group by   |       $group        |
+|    having    |       $match        |
+|    select    |      $project       |
+|   order by   |        $sort        |
+|    limit     |       $limit        |
+|    sum()     |        $sum         |
+|   count()    |        $sum         |
+|     join     | $loopup（v3.2新增） |
+
+如果$match是在group的前侧就当作where处理，在后侧就当作having处理，
+
+1. 求和 -$sum
+
+   查询dev集合中一共有多少个文档
+
+     ```java
+   > db.dev.aggregate([{$group:{_id:null,count:{$sum:1}}}])
+   { "_id" : null, "count" : 17 }
+     ```
+
+   查询dev2集合中所有size键中值得总和
+
+   ```java
+   > db.dev2.aggregate([{$group:{_id:null,totalSize:{$sum:"$size"}}}])
+   { "_id" : null, "totalSize" : 2000 }
+   ```
+
+   对每一个title进行分组并计算每组中的size的总和
+
+   ```java
+   > db.dev2.aggregate([{$group:{_id:"$title",totalSize:{$sum:"$size"}}}])
+   { "_id" : "test5", "totalSize" : 500 }
+   { "_id" : "test4", "totalSize" : 400 }
+   { "_id" : "java", "totalSize" : 0 }
+   { "_id" : "test2", "totalSize" : 200 }
+   { "_id" : "dev2", "totalSize" : 0 }
+   { "_id" : "test3", "totalSize" : 300 }
+   { "_id" : "hhh", "totalSize" : 0 }
+   { "_id" : 100, "totalSize" : 400 }
+   { "_id" : "test1", "totalSize" : 200 }
+   ```
+
+2. 条件筛选-$match
+
+   查询dev2集合中size大于200（相当于where）
+
+   ```java
+   > db.dev2.aggregate({$match:{size:{$gt:200}}},{$group:{_id:null,totalSize:{$sum:1}}})
+   { "_id" : null, "totalSize" : 4 }
+   ```
+
+   查询dev2集合，根据title分组计算出每组的size总和，并过滤掉总和小于等于200的文档（相当于having）
+
+    ```java
+   > db.dev2.aggregate([{$group:{_id:"$title",totalSize:{$sum:"$size"}}},{$match:{totalSize:{$gte:200}}}])
+   { "_id" : "test5", "totalSize" : 500 }
+   { "_id" : "test4", "totalSize" : 400 }
+   { "_id" : "test2", "totalSize" : 200 }
+   { "_id" : "test3", "totalSize" : 300 }
+   { "_id" : 100, "totalSize" : 400 }
+   { "_id" : "test1", "totalSize" : 200 }
+    ```
+
+3. 最大值-$max
+
+   查询dev2中size最大的文档
+
+   ```java
+   > db.dev2.aggregate([{$group:{_id:null,maxSize:{$max:"$size"}}}])
+   { "_id" : null, "maxSize" : "500" }
+   ```
+
+4. $min最小值
+
+   查询dev集合中size最小的文档
+
+   ```java
+   > db.dev2.aggregate([{$group:{_id:null,minSize:{$min:"$size"}}}])
+   { "_id" : null, "minSize" : 200 }
+   ```
+
+5. 平均值-$avg
+
+   ```java
+   > db.dev2.aggregate([{$group:{_id:null,sizeAvg:{$avg:"$size"}}}])
+   { "_id" : null, "sizeAvg" : 333.3333333333333 }
+   ```
+
+   
 
 
 

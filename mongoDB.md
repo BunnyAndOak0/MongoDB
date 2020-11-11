@@ -1481,7 +1481,7 @@ i，m，x，s可以组合使用
    { "_id" : 300, "titleArray" : [ "test3" ] }
    ```
 
-7. 数组字段拆分-$unwind
+7.  数组字段拆分-$unwind
 
    查询集合dev2，将数组中的内容拆分显示
 
@@ -1518,20 +1518,150 @@ i，m，x，s可以组合使用
    2. 字符串处理
 
       通过MongDB的字符串操作符对投影的内容做字符串的处理
+      
+      将title转为大写和小写
+      
+      ```java
+      > db.dev.aggregate([{$unwind:"$tags"},{$project:{_id:0,New_Titlte:{$toLower:"$title"},New_Tags:{$toUpper:"$tags"}}}])
+      { "New_Titlte" : "java", "New_Tags" : "JAVASE" }
+      { "New_Titlte" : "java", "New_Tags" : "JAVAEE" }
+      { "New_Titlte" : "java", "New_Tags" : "JAVAME" }
+      ```
+      
+      拼接title何tags字段
+      
+      ```java
+      > db.dev.aggregate([{$unwind:"$tags"},{$project:{_id:0,Titlte_Tags:{$concat:["$title","-","$tags"]}}}])
+      { "Titlte_Tags" : "java-javase" }
+      { "Titlte_Tags" : "java-javaee" }
+      { "Titlte_Tags" : "java-javame" }
+      ```
+      
+      将数组内容拆分显示，只显示title字段的前三个字符，命名为Title_Prefix
+      
+      ```java
+      > db.dev.aggregate([{$unwind:"$tags"},{$project:{_id:0,Titlt_Prefix:{$substr:["$title",0,3]}}}])
+      { "Titlt_Prefix" : "jav" }
+      { "Titlt_Prefix" : "jav" }
+      { "Titlt_Prefix" : "jav" }
+      ```
+      
+      对于汉字部分，$substr只能匹配ASCII的数据，对于中文要使用$substrCP
+      
+   3. 算术运算
+
+      在$project中，可以通过MongDB的算数作符对投影的内容做运算处理。
+
+      查询dev中集合的数据，显示title何size字段，为size字段数据做加一操作，显示字段命名为New_Size
+
+      ```java
+      > db.dev2.aggregate([{$project:{_id:0,title:"$title",New_Size:{$add:["$size",1]}}}])
+      ```
+
+      排除没有size键的文档
+
+      ```java
+      > db.dev2.aggregate([{$match:{size:{$ne:null}}},{$project:{_id:0,title:1,New_Size:{$add:["$size",1]}}}])
+      ```
+      
+   4. 日期操作
+
+      插入操作
+
+      插入当前时间db.dev.insert({date:new Date()})
+
+      MongoDB中的事件会比系统当前时间少8个消失(它使用的是UTC时间)。
+
+      ```java
+      > db.dev.insert({time:new Date()})
+         WriteResult({ "nInserted" : 1 })
+         > db.dev.find({time:{$ne:null}})
+         { "_id" : ObjectId("5fa96243f55eb7efe9be5b3d"), "time" : ISODate("2020-11-09T15:37:39.053Z") }
+      ```
+
+      1. 方式一
+
+         ```java
+         > db.dev.insert({time:new Date("2020-11-10T12:48:56Z")})
+         WriteResult({ "nInserted" : 1 })
+         ```
+
+         用new Date()插入日期，必须使用标准的日期格式
+
+         2. 方式二
+
+            用ISODate()函数插入
+
+            ```java
+            > db.dev.insert({time:new Date("2020-11-10T12:48:56Z")})
+            WriteResult({ "nInserted" : 1 })
+            ```
+
+            没有标准日期格式（T、Z不存在）
+
+      日期处理
+
+       查询dev集合中数据，显示birth字段的各部分数据，包括：年、月、日等信息。
+
+      显示年月日
+
+      ```java
+      > db.dev.aggregate([{$match:{name:"admin"}},{$project:{月份:{$year:"$birth"},月份:{$month:"$birth"},日:{$dayOfMonth:"$birth"}}}])
+      { "_id" : ObjectId("5fa9d73dd230532beacac398"), "月份" : 5, "日" : 1 }
+      ```
+
+      显示小时、分钟、秒、毫秒
+
+      ```java
+      > db.dev.aggregate([{$match:{name:"admin"}},{$project:{年份:{$year:"$birth"},月份:{$month:"$birth"},日:{$dayOfMonth:"$birth"},时:{$hour:"$birth"},分:{$minute:"$birth"},秒:{$second:"$birth"},毫秒:{$millisecond:"$birth"}}}])
+      { "_id" : ObjectId("5fa9d73dd230532beacac398"), "年份" : 1990, "月份" : 5, "日" : 1, "时" : 13, "分" : 30, "秒" : 0, "毫秒" : 0 }
+      ```
+
+      显示星期、全年的第几周、全年中第几天
+
+      ```java
+      > db.dev.aggregate([{$match:{name:"admin"}},{$project:{年份:{$year:"$birth"},月份:{$month:"$birth"},日:{$dayOfMonth:"$birth"},时:{$hour:"$birth"},分:{$minute:"$birth"},秒:{$second:"$birth"},毫秒:{$millisecond:"$birth"},星期:{$dayOfWeek:"$birth"},第几周:{$week:"$birth"},第几天:{$dayOfYear:"$birth"}}}])
+      { "_id" : ObjectId("5fa9d73dd230532beacac398"), "年份" : 1990, "月份" : 5, "日" : 1, "时" : 13, "分" : 30, "秒" : 0, "毫秒" : 0, "星期" : 3, "第几周" : 17, "第几天" : 121 }
+      ```
+
+      {$dayOfWeek:"$birth"}：星期日为1，星期六为7
+
+      {$week："$birth"}：全年的周计数从0开始
+
+      {$dayOfYear："$birth"}：全年中的第几天
+
+      
+
+      显示系定义日期格式
+
+      ```java
+      { "_id" : ObjectId("5fa9d73dd230532beacac398"), "自定义日期格式" : "1990年05月$d日 13时30分00秒" }
+      ```
 
 
 
 
+## Java访问MongoDB
 
+1. 连接MongoDB数据库
 
+   1. 创建工程
 
+      pom中田家庵MongoDB驱动坐标
 
+      ```xml
+       <!--添加mongodb驱动坐标-->
+              <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
+              <dependency>
+                  <groupId>org.mongodb</groupId>
+                  <artifactId>mongo-java-driver</artifactId>
+                  <version>3.11.0</version>
+              </dependency>
+      ```
 
+   2. 创建MongoDB连接
 
-
-
-
-
+      
 
 
 

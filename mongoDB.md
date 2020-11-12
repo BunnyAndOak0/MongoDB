@@ -1661,13 +1661,160 @@ i，m，x，s可以组合使用
 
    2. 创建MongoDB连接
 
+      封装MongoDBUtil
       
+      ```java
+      public class MongDBUtil {
+          private static MongoClient client = null;
+      
+          static {
+              if (client == null){
+                  client = new MongoClient("39.101.201.68", 27017);
+              }
+          }
+      
+          //获取MongoDB中的数据库
+          public static MongoDatabase getDataBase(String dbName){
+              return client.getDatabase(dbName);
+          }
+      
+          //获取MongoDB中的集合
+          public static MongoCollection getCollection(String dbName, String collName){
+              MongoDatabase dataBase = getDataBase(dbName);
+              return dataBase.getCollection(collName);
+          }
+      }
+      ```
+      
+      创建连接
+      
+      ```java
+      public class MongoDBDemo {
+          public static void main(String[] args) {
+      //        //创建链接对象
+      ////        MongoClient client = new MongoClient("39.101.201.68", 27017);
+      ////        //获取mongodb的数据库
+      ////        MongoDatabase database = client.getDatabase("develop");
+      ////        //获取MongDb中的集合
+      ////        MongoCollection collection = database.getCollection("dev");
+      ////
+      ////        System.out.println("ok......");
+      
+              MongoCollection collection = MongDBUtil.getCollection("develop", "dev");
+              System.out.println("ok......");
+          }
+      ```
+   
+2. 创建MongoDB的认证链接
 
+   封装MOngoDBAuthUtil
 
+   ```java
+   public class MongoDBAuthUtil {
+       private static MongoClient client = null;
+   
+       static {
+           if (client ==null){
+               //创建一个封装用户认证信息的对象
+               MongoCredential credential = MongoCredential.createCredential("bunny", "develop", "bunny".toCharArray());
+               //封装MongoDB的地址与端口
+               ServerAddress address = new ServerAddress("39.101.201.68", 27017);
+               client = new MongoClient(address, Arrays.asList(credential));
+           }
+       }
+   
+       public static MongoDatabase getDatabase(String dbName){
+           return client.getDatabase(dbName);
+       }
+   
+       public static MongoCollection getCollection(String dbName, String collName){
+           MongoDatabase database = getDatabase(dbName);
+           return database.getCollection(collName);
+       }
+   }
+   ```
 
+   ```java
+   MongoCollection collection1 = MongoDBAuthUtil.getCollection("develop", "dev");
+           System.out.println("ok2......");
+   ```
 
+3. 创建MongoDB的池连
 
+   封装MongoDBPoolUtil
 
+   ```java
+   public class MongoDBPoolUtil {
+       private static MongoClient client = null;
+   
+       static {
+           if (client == null){
+               MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
+               builder.connectionsPerHost(10);      //每个地址的最大连接数  默认为10
+               builder.connectTimeout(5000);   //设置链接超时时间  单位是毫秒
+               builder.socketTimeout(5000);    //设置读写操作的操作时间   单位是毫秒
+               ServerAddress address = new ServerAddress("39.101.201.68", 27017);
+               client = new MongoClient(address, builder.build());
+           }
+       }
+   
+       //获取MongoDB中的数据库
+       public static MongoDatabase getDataBase(String dbName){
+           return client.getDatabase(dbName);
+       }
+   
+       //获取MongoDB中的集合
+       public static MongoCollection getCollection(String dbName, String collName){
+           MongoDatabase dataBase = getDataBase(dbName);
+           return dataBase.getCollection(collName);
+       }
+   }
+   ```
+
+   ```java
+   MongoCollection collection3 = MongoDBPoolUtil.getCollection("develop", "dev");
+           System.out.println("ok3......");
+   ```
+
+4. 创建MongoDB的认证池连
+
+   ```java
+   public class MongoDBAuthPoolUtil {
+       private static MongoClient client = null;
+   
+       static {
+           if (client == null){
+               MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
+               builder.connectionsPerHost(10);      //每个地址的最大连接数  默认为10
+               builder.connectTimeout(5000);   //设置链接超时时间  单位是毫秒
+               builder.socketTimeout(5000);    //设置读写操作的操作时间   单位是毫秒
+   
+               MongoCredential credential = MongoCredential.createCredential("bunny", "develop", "bunny".toCharArray());
+   
+               ServerAddress address = new ServerAddress("39.101.201.68", 27017);
+               client = new MongoClient(Arrays.asList(address), credential, builder.build());
+           }
+       }
+   
+       //获取MongoDB中的数据库
+       public static MongoDatabase getDataBase(String dbName){
+           return client.getDatabase(dbName);
+       }
+   
+       //获取MongoDB中的集合
+       public static MongoCollection getCollection(String dbName, String collName){
+           MongoDatabase dataBase = getDataBase(dbName);
+           return dataBase.getCollection(collName);
+       }
+   }
+   ```
+
+   ```java
+   MongoCollection collection4 = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           System.out.println("ok4......");
+   ```
+
+   
 
 
 

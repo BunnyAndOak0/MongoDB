@@ -1,6 +1,7 @@
 package edu.kmust.util;
 
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 /**
@@ -23,5 +24,8 @@ public class MongDBUtil {
     }
 
     //获取MongoDB中的集合
-
+    public static MongoCollection getCollection(String dbName, String collName){
+        MongoDatabase dataBase = getDataBase(dbName);
+        return dataBase.getCollection(collName);
+    }
 }

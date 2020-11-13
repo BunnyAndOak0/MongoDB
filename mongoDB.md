@@ -1640,8 +1640,9 @@ i，m，x，s可以组合使用
 
 
 
-
 ## Java访问MongoDB
+
+### 连接MongoDB
 
 1. 连接MongoDB数据库
 
@@ -1814,7 +1815,41 @@ i，m，x，s可以组合使用
            System.out.println("ok4......");
    ```
 
-   
+
+### 操作集合
+
+```java
+    //获取MongoDB中的集合
+    public static MongoCollection getCollection(String dbName, String collName){
+        MongoDatabase dataBase = getDataBase(dbName);
+        return dataBase.getCollection(collName);
+    }
+
+    //创建集合
+    public static void createCollection(String dbName, String collName){
+        MongoDatabase dataBase = getDataBase(dbName);
+        dataBase.createCollection(collName);
+    }
+
+    //删除集合
+    public static void dropCollection(MongoCollection collection){
+        collection.drop();
+    }
+```
+
+### 操作文档
+
+ 
+
+
+
+
+
+
+
+
+
+
 
 
 

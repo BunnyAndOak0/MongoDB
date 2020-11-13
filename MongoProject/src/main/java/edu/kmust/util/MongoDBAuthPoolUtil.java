@@ -24,7 +24,7 @@ public class MongoDBAuthPoolUtil {
             builder.connectTimeout(5000);   //设置链接超时时间  单位是毫秒
             builder.socketTimeout(5000);    //设置读写操作的操作时间   单位是毫秒
 
-            MongoCredential credential = MongoCredential.createCredential("bunny", "develop", "bunny".toCharArray());
+            MongoCredential credential = MongoCredential.createCredential("bunny", "admin", "bunny".toCharArray());
 
             ServerAddress address = new ServerAddress("39.101.201.68", 27017);
             client = new MongoClient(Arrays.asList(address), credential, builder.build());
@@ -40,5 +40,16 @@ public class MongoDBAuthPoolUtil {
     public static MongoCollection getCollection(String dbName, String collName){
         MongoDatabase dataBase = getDataBase(dbName);
         return dataBase.getCollection(collName);
+    }
+
+    //创建集合
+    public static void createCollection(String dbName, String collName){
+        MongoDatabase dataBase = getDataBase(dbName);
+        dataBase.createCollection(collName);
+    }
+
+    //删除集合
+    public static void dropCollection(MongoCollection collection){
+        collection.drop();
     }
 }

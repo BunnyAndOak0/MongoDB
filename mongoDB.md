@@ -1839,11 +1839,86 @@ i，m，x，s可以组合使用
 
 ### 操作文档
 
- 
+1. 更新文档
 
+   更新单个文档
 
+   ```java
+    /**
+        * @Author BunnyAndOak0
+        * @Description 更新单个文档的单个键
+        **/
+       public void updateSingleDocumentSingleKey(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           //更新文档
+           //Filters时封装了条件的工具类
+           collection.updateOne(Filters.eq("username", "lisi"), new Document("$set", new Document("userage", 28)));
+       }
+   ```
 
+   更新单个文档中的多个键
 
+   ```java
+   /**
+        * @Author BunnyAndOak0
+        * @Description 更新单个文档的多个键
+        **/
+       public void updateSingleDocumentManyKey(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           collection.updateOne(Filters.eq("username", "zhangsan"),
+                   new Document("$set", new Document("uesrage", 18).append("userdesc", "very good")));
+       }
+   ```
+
+   
+
+   更新多个文档的单个键
+
+   ```java
+   /**
+        * @Author BunnyAndOak0
+        * @Description 更新多个文档的多个键
+        **/
+       public void updateManyDocumentSingleKey(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           collection.updateMany(Filters.ne("username", null),
+                   new Document("$set", new Document("userdesc", "perfect")));
+       }
+   ```
+
+   更新多个文档中的多个键
+
+   ```java
+   /**
+        * @Author BunnyAndOak0
+        * @Description 更新多个文档的多个键
+        **/
+       public void updateManyDocumentManyKey(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           collection.updateMany(Filters.ne("username", null),
+                   new Document("$set", new Document("userdesc", "OK").append("userage", 20)));
+       }
+   ```
+
+   更新文档中的数组
+
+   ```java
+   /**
+        * @Author BunnyAndOak0
+        * @Description 更新文档中的数组
+        **/
+       public void updateDocumentArray(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("devvelop", "dev");
+           collection.updateOne(Filters.eq("username", "lisi"),
+                   new Document("$push", new Document("userlike", "Art")));
+       }
+   ```
+
+2. 查询文档
+
+   查询全部文档
+
+   
 
 
 

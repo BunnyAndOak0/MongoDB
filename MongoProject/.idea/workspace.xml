@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="da55daf4-7fc1-4817-b17f-0fdcacd7e59a" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/../MongoDB.md" beforeDir="false" afterPath="$PROJECT_DIR$/../MongoDB.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/kmust/demo/SelectDocument.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/kmust/demo/SelectDocument.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,7 +117,7 @@
       <workItem from="1605286396761" duration="2023000" />
       <workItem from="1605312907708" duration="2062000" />
       <workItem from="1605535693758" duration="4826000" />
-      <workItem from="1605570393919" duration="1385000" />
+      <workItem from="1605570393919" duration="1592000" />
     </task>
     <servers />
   </component>

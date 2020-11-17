@@ -2068,6 +2068,45 @@ i，m，x，s可以组合使用
    
    逻辑运算符-$and
    
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 查询用户username是zhangsan1并且年龄为20岁的用户
+        **/
+       public void selectDocumentConditionUseAnd(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("devvelop", "dev");
+           FindIterable<Document> iterable = collection.find(Filters.and(Filters.eq("username", "zhangsan1"),
+                   Filters.eq("userage", "20"), Filters.eq("userdesc", "OK")));
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                       + docu.get("userdesc") + "\t" + docu.get("userlike")));
+           }
+       } 
+   ```
+   
+   逻辑运算符-$or
+   
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 查询用户要求用户username是lisi 或者年龄是20 或者userdesc是Very Good
+        **/
+       public void selectDocumentConditionUseOr(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           FindIterable<Document> iterable = collection.find(Filters.or(Filters.eq("username", "lisi"), Filters.eq("userage", "20"),
+                   Filters.eq("userdesc", "Very Good")));
+           MongoCursor<Document> cursor = iterable.iterator();
+           while(cursor.hasNext()){
+               Document docu = cursor.next();System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                       + docu.get("userdesc") + "\t" + docu.get("userlike")));
+           }
+       }
+   ```
+   
+   
+   
    
    
    

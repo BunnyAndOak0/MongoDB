@@ -1918,6 +1918,160 @@ i，m，x，s可以组合使用
 
    查询全部文档
 
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 查询全部文档
+        **/
+       public void selectDocumentAll(){
+           MongoCollection collection = MongoDBAuthUtil.getCollection("develop", "dev");
+           //返回一个文档的迭代器
+           FindIterable<Document> iterable = collection.find();
+           //拿出来的是一个游标
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               //每调一次next方法移动一次指针
+               Document docu = cursor.next();
+               System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                       + docu.get("userdesc") + "\t" + docu.get("userlike")));
+           }
+       }
+   ```
+   
+   （find）返回的是一个迭代器
+   
+   
+   
+   根据_id查询文档
+   
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 根据_id查询文档
+        **/
+       public void selectDocuemtnById(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           FindIterable<Document> iterable = collection.find(Filters.eq("_id", new ObjectId("5f91a923da6db601a79cdcd4")));
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                       + docu.get("userdesc") + "\t" + docu.get("userlike")));
+           }
+       }
+   ```
+   
+   ObjectId是一个对象
+   
+   
+   
+   查询多个文档-$gt
+   
+   ```java
+      /**
+        * @Author BunnyAndOak0
+        * @Description 根据年龄查询文档 年龄大于19岁
+        **/
+       public void selectDocumentConditionByGt(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           FindIterable<Document> iterable = collection.find(Filters.gt("userage", 19));
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                       + docu.get("userdesc") + "\t" + docu.get("userlike")));
+           }
+       }
+   ```
+   
+   查询多个文档-$type
+   
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 根据年龄查询文档 年龄的数值是整数类型（number）
+        **/
+       public void selectDocumentConditionByType(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           FindIterable<Document> iterable = collection.find(Filters.type("userage", "number"));
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                       + docu.get("userdesc") + "\t" + docu.get("userlike")));
+           }
+       }
+   ```
+   
+   查询多个文档-$in
+   
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 查询用户的名字为 zhangsan1，zhangsan2
+        **/
+       public void selectDocumentConditionByIn(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           FindIterable<Document> iterable = collection.find(Filters.in("username", "zhangsan1", "zhangsan2"));
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                       + docu.get("userdesc") + "\t" + docu.get("userlike")));
+           }
+       }
+   ```
+   
+   查询多个文档-$nin
+   
+   $nin表示not in，表示不在
+   
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 查询用户的名字不是 zhangsan1，zhangsan2
+        **/
+       public void selectDocumentConditionByNin(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           FindIterable<Document> iterable = collection.find(Filters.nin("username", "zhangsan1", "zhangsan2"));
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                       + docu.get("userdesc") + "\t" + docu.get("userlike")));
+           }
+       }
+   ```
+   
+   查询多个文档-$regex
+   
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 查询用户的名字是z开头，2结尾的
+      **/
+       public void selectDocumentConditionByRegex(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop",  "dev");
+           FindIterable<Document> iterable = collection.find(Filters.regex("username", Pattern.compile("^z.*2$")));
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                       + docu.get("userdesc") + "\t" + docu.get("userlike")));
+           }
+       }
+   ```
+   
+   正则表达式写在Pattern.compile()里面
+   
+   
+   
+   逻辑运算符-$and
+   
+   
+   
+   
+   
    
 
 

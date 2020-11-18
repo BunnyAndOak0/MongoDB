@@ -2099,23 +2099,137 @@ i，m，x，s可以组合使用
                    Filters.eq("userdesc", "Very Good")));
            MongoCursor<Document> cursor = iterable.iterator();
            while(cursor.hasNext()){
-               Document docu = cursor.next();System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+               Document docu = cursor.next();
+               System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
                        + docu.get("userdesc") + "\t" + docu.get("userlike")));
            }
        }
    ```
    
+   逻辑运算符-$and与$for联合使用
    
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 查询文档中username为lisi并且年龄为20岁，或者userdesc为Very Good
+        **/
+       public void selectDocumentConditionAndOr(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           FindIterable<Document> iterable = collection.find(Filters.or(Filters.and(Filters.eq("username", "lisi"),
+                   Filters.eq("userage", 20)), Filters.eq("userdesc", "Very Good")));
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                       + docu.get("userdesc") + "\t" + docu.get("userlike")));
+           }
+       }
+   ```
    
+   查询文档-排序处理
    
+    ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 查询文档中username是z开头，
+        * 根据username对结果做降序排序   1为升序排序  -1为降序排序
+        **/
+       public void selectDocumentSort(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           FindIterable<Document> iterable = collection.find(Filters.regex("username",
+                   Pattern.compile("^z"))).sort(new Document("username", -1));
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                       + docu.get("userdesc") + "\t" + docu.get("userlike")));
+           }
+       }
+    ```
    
-   
-   
-   
+3. 日期操作
 
+   插入系统当前日期
 
+    ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 插入系统当前日期
+        **/
+       public void insertDocumentSystemDate(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           Document docu = new Document();
+           docu.put("username", "wangwu");
+           docu.put("userage", 22);
+           docu.put("userdesc", "Very Good");
+           docu.put("userlike", Arrays.asList(new String[]{"Music", "Art"}));
+           //因为new Date()是按照当前处于东八区的位置来给定的日期，而不是UTC得时间来给定，因此会少八个小时
+           //查询的时候如果还是使用java.util下面的Date()的话，时间会自动转换，因此会正常显示
+       docu.put("userbirth", new Date());
+           collection.insertOne(docu);
+       }
+    ```
 
+   插入指定日期
 
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 插入指定日期
+        **/
+       public void insertDocumentCustoDate(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+   
+           Date date = DateUtil.StringToDate("yyyy-MM-dd HH:mm:ss", "2020-11-18 07:45:21");
+   
+           Document docu = new Document();
+           docu.put("username", "zhaoliu");
+           docu.put("userage", 24);
+           docu.put("userdesc", "Very Good");
+           docu.put("userlike", Arrays.asList(new String[]{"Music", "Art"}));
+           docu.put("userbirth", date);
+           collection.insertOne(docu);
+       }
+   ```
+
+   工具类
+
+   ```java
+   /**
+    * @Author BunnyAndOak0
+    * @Description
+    * @Date 2020/11/18 8:09
+    **/
+   public class DateUtil {
+       /**
+        * @Author BunnyAndOak0
+        * @Description Date To String
+        **/
+       public static String dateToString(String pattern, Date date){
+           SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+           return simpleDateFormat.format(date);
+       }
+   
+       /**
+        * @Author BunnyAndOak0
+        * @Description String To Date
+        **/
+       public static Date StringToDate(String pattern, String date){
+           SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+   
+           Date d = null;
+   
+           try {
+               d = simpleDateFormat.parse(date);
+           }catch (Exception e){
+               e.printStackTrace();
+           }
+           return d;
+       }
+   }
+   ```
+
+   
 
 
 

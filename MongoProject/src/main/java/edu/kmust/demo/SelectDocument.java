@@ -29,6 +29,8 @@ public class SelectDocument {
         selectDocument.selectDocumentConditionByRegex();
         selectDocument.selectDocumentConditionUseAnd();
         selectDocument.selectDocumentConditionUseOr();
+        selectDocument.selectDocumentConditionAndOr();
+        selectDocument.selectDocumentSort();
     }
 
      /**
@@ -165,10 +167,46 @@ public class SelectDocument {
                 Filters.eq("userdesc", "Very Good")));
         MongoCursor<Document> cursor = iterable.iterator();
         while(cursor.hasNext()){
-            Document docu = cursor.next();System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+            Document docu = cursor.next();
+            System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
                     + docu.get("userdesc") + "\t" + docu.get("userlike")));
         }
     }
+
+    /**
+     * @Author BunnyAndOak0
+     * @Description 查询文档中username为lisi并且年龄为20岁，或者userdesc为Very Good
+     **/
+    public void selectDocumentConditionAndOr(){
+        MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+        FindIterable<Document> iterable = collection.find(Filters.or(Filters.and(Filters.eq("username", "lisi"),
+                Filters.eq("userage", 20)), Filters.eq("userdesc", "Very Good")));
+        MongoCursor<Document> cursor = iterable.iterator();
+        while (cursor.hasNext()){
+            Document docu = cursor.next();
+            System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                    + docu.get("userdesc") + "\t" + docu.get("userlike")));
+        }
+    }
+
+    /**
+     * @Author BunnyAndOak0
+     * @Description 查询文档中username是z开头，
+     * 根据username对结果做降序排序   1为升序排序  -1为降序排序
+     **/
+    public void selectDocumentSort(){
+        MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+        FindIterable<Document> iterable = collection.find(Filters.regex("username",
+                Pattern.compile("^z"))).sort(new Document("username", -1));
+        MongoCursor<Document> cursor = iterable.iterator();
+        while (cursor.hasNext()){
+            Document docu = cursor.next();
+            System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                    + docu.get("userdesc") + "\t" + docu.get("userlike")));
+        }
+    }
+
+
 
 }
 

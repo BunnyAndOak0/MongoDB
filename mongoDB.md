@@ -2229,6 +2229,64 @@ i，m，x，s可以组合使用
    }
    ```
 
+   查询日期
+   
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 插入日期 查询生日为2020-11-18 07:45:21的用户的信息
+        **/
+       public void selectDocumentDateUseEq(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+   
+           Date date = DateUtil.StringToDate("yyyy-MM-dd HH:mm:ss", "2020-11-18 07:45:21");
+   
+           FindIterable<Document> iterable = collection.find(Filters.eq("userbirth", date));
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               String temp = DateUtil.dateToString("yyyy-MM-dd HH:mm:ss", (Date)docu.get("userbirth"));
+               System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                       + docu.get("userdesc") + "\t" + docu.get("userlike") + "\t" +
+                       docu.get("userbirth") + "\t" + temp));
+           }
+       }
+   ```
+   
+   查询日期-$gt
+   
+   （大于）
+   
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 查询日期 查询生日大于查询生日为2020-11-18 00:00:00的用户的信息的用户的信息
+        **/
+       public void selectDocumentDateUseGt(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           Date date = DateUtil.StringToDate("yyyy-MM-dd HH:mm:ss", "2020-11-18 00:00:00");
+           FindIterable<Document> iterable = collection.find(Filters.gt("userbirth", date));
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               String temp = DateUtil.dateToString("yyyy-MM-dd HH:mm:ss", (Date)docu.get("userbirth"));
+               System.out.println(docu.get("username" + "\t" + docu.get("userage") + "\t"
+                       + docu.get("userdesc") + "\t" + docu.get("userlike") + "\t" +
+                       docu.get("userbirth") + "\t" + temp));
+           }
+       }
+   ```
+   
+4. 聚合操作
+
+   聚合操作-$sum
+
+   查询集合中文档的数量
+
+   ```java
+   db.dev.aggregate([{$group:{_id:null, count:{$sum:1}}}])
+   ```
+
    
 
 

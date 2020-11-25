@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import edu.kmust.util.MongoDBAuthPoolUtil;
 import org.bson.Document;
+import sun.misc.DoubleConsts;
 
 import javax.swing.event.DocumentEvent;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class AggregateOperDemo {
         aggregateOperDemo.selectDocumentAggregateSum();
         aggregateOperDemo.selectDocumentAggregateGroupBySum();
         aggregateOperDemo.selectDocumentAggregateGroupByWhere();
+        aggregateOperDemo.selectDocumentAggregateGroupByHaving();
     }
 
     /**
@@ -142,6 +144,43 @@ public class AggregateOperDemo {
         List<Document> list = new ArrayList<Document>();
         list.add(match);
         list.add(group);
+
+        AggregateIterable iterable = collection.aggregate(list);
+        MongoCursor<Document> cursor = iterable.iterator();
+        while (cursor.hasNext()){
+            Document docu = cursor.next();
+            System.out.println(docu.get("totalSize"));
+        }
+    }
+    
+    /**
+     * @Author BunnyAndOak0
+     * @Description 查询dev集合，根据他title分组计算出每组size的总和，并过滤掉总和小于200的文档
+     * db.dev.aggregate([{$group:{_id:"$title", totalSize:{$sum:"$size"}}},{$match:{totalSize:{$gt:200}}}])
+     **/
+    public void selectDocumentAggregateGroupByHaving(){
+        MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+        Document sum = new Document();
+        sum.put("$sum", "$size");
+
+        Document totalSize = new Document();
+        totalSize.put("_id", "$title");
+        totalSize.put("totalSize", sum);
+
+        Document group = new Document();
+        group.put("$group", totalSize);
+
+        Document gt = new Document();
+        gt.put("$gt", 200);
+        Document mtotalSize = new Document();
+        mtotalSize.put("totalSize", gt);
+
+        Document match = new Document();
+        match.put("$match", mtotalSize);
+
+        List<Document> list = new ArrayList<Document>();
+        list.add(totalSize);
+        list.add(match);
 
         AggregateIterable iterable = collection.aggregate(list);
         MongoCursor<Document> cursor = iterable.iterator();

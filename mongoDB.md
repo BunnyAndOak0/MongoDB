@@ -2437,6 +2437,177 @@ i，m，x，s可以组合使用
        }
    ```
    
+   分组后的数据过滤
+   
+   查询dev集合，根据他title分组计算出每组size的总和，并过滤掉总和小于200的文档
+   
+   db.dev.aggregate([{$group:{_id:"$title", totalSize:{$sum:"$size"}}},{$match:{totalSize:{$gt:200}}}])
+   
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 查询dev集合，根据他title分组计算出每组size的总和，并过滤掉总和小于200的文档
+        * db.dev.aggregate([{$group:{_id:"$title", totalSize:{$sum:"$size"}}},{$match:{totalSize:{$gt:200}}}])
+        **/
+       public void selectDocumentAggregateGroupByHaving(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+           Document sum = new Document();
+           sum.put("$sum", "$size");
+   
+           Document totalSize = new Document();
+           totalSize.put("_id", "$title");
+           totalSize.put("totalSize", sum);
+   
+           Document group = new Document();
+           group.put("$group", totalSize);
+   
+           Document gt = new Document();
+           gt.put("$gt", 200);
+           Document mtotalSize = new Document();
+           mtotalSize.put("totalSize", gt);
+   
+           Document match = new Document();
+           match.put("$match", mtotalSize);
+   
+           List<Document> list = new ArrayList<Document>();
+           list.add(totalSize);
+           list.add(match);
+   
+           AggregateIterable iterable = collection.aggregate(list);
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               System.out.println(docu.get("totalSize"));
+           }
+       }
+   ```
+   
+   聚合投影操作
+   
+   查询dev集合，将数组中的内容拆分显示，并只显示title键和tag键的值
+   
+   db.dev.aggregate([{$unwind:"$tags"},{$project:{_id:0,"tags:$tags",title:"$title"}}])
+   
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 查询dev集合，将数组中的内容拆分显示，并只显示title键和tag键的值
+        * db.dev.aggregate([{$unwind:"$tags"},{$project:{_id:0,"tags:$tags",title:"$title"}}])
+        **/
+       public void selectDocumentProject(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+   
+           Document unwind = new Document();
+           unwind.put("$unwind", "$tags");
+   
+           Document pro = new Document();
+           pro.put("_id", 0);
+           pro.put("tags", "$tags");
+           pro.put("title", "$title");
+   
+           Document project = new Document();
+           project.put("$project", pro);
+   
+           List<Document> list = new ArrayList<Document>();
+           list.add(unwind);
+           list.add(pro);
+   
+           AggregateIterable iterable = collection.aggregate(list);
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               System.out.println(cursor.next());
+           }
+   ```
+   
+   字符串处理
+   
+   查询dev集合，将数组中的内容拆分显示，将title字段和tags字段的值拼接为一个完整的字符串并在Title_Tags字段中显示
+   
+   db.dev.aggregate([{$unwind:"$tags"},{$project:{_id:0,Title_Tags:{$concat:["$title","-","$tags"]}}}])
+   
+   ```java
+   /**
+        * @Author BunnyAndOak0
+        * @Description 查询dev集合，将数组中的内容拆分显示，将title字段和tags字段的值拼接为一个完整的字符串并在Title_Tags字段中显示
+        * db.dev.aggregate([{$unwind:"$tags"},{$project:{_id:0,Title_Tags:{$concat:["$title","-","$tags"]}}}])
+        **/
+       public void selectDocumentProjectConcat(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+   
+           Document unwind = new Document();
+           unwind.put("$unwind", "$tags");
+   
+           Document concat = new Document();
+           concat.put("$concat", Arrays.asList(new String[]{"$title", "-", "$tags"}));
+   
+           Document title = new Document();
+           title.put("_id", 0);
+           title.put("Title_Tags", concat);
+   
+           Document project = new Document();
+           project.put("$project", title);
+   
+           List<Document> list = new ArrayList<Document>();
+           list.add(unwind);
+           list.add(project);
+   
+           AggregateIterable iterable = collection.aggregate(list);
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               System.out.println(cursor.next());
+           }
+   ```
+   
+   算数运算
+   
+   查询dev集合中数据，显示title和size字段，为size字段数据做加1处理，显示字段命名为New_Size,排除那些没有size键的文档
+   
+   db.dev.aggregate([{$match:{$size:{$ne:null}}},{$project:{_id:0,title:1,New_Size:{$add:["$size",1]}}}])
+   
+   ```java
+       /**
+        * @Author BunnyAndOak0
+        * @Description 查询dev集合中数据，显示title和size字段，为size字段数据做加1处理，显示字段命名为New_Size,排除那些没有size键的文档
+        * db.dev.aggregate([{$match:{$size:{$ne:null}}},{$project:{_id:0,title:1,New_Size:{$add:["$size",1]}}}])
+        **/
+       public void selectDocumentProjectAdd(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+   
+           Document ne = new Document();
+           ne.put("$ne", null);
+   
+           Document size = new Document();
+           size.put("size", ne);
+   
+           Document match = new Document();
+           match.put("$match", size);
+   
+           Document add = new Document();
+           add.put("$add", Arrays.asList(new Object[]{"$size", 1}));
+   
+           Document new_size = new Document();
+           new_size.put("_id", 0);
+           new_size.put("title", 1);
+           new_size.put("New_Size", add);
+   
+           Document project = new Document();
+           project.put("$project", new_size);
+   
+           List<Document> list = new ArrayList<Document>();
+           list.add(match);
+           list.add(project);
+   
+           AggregateIterable iterable = collection.aggregate(list);
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               Document docu = cursor.next();
+               System.out.println(cursor.next());
+           }
+       }
+   ```
+   
    
 
 

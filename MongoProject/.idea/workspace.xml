@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="da55daf4-7fc1-4817-b17f-0fdcacd7e59a" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/../MongoDB.md" beforeDir="false" afterPath="$PROJECT_DIR$/../MongoDB.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/kmust/demo/AggregateOperDemo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/kmust/demo/AggregateOperDemo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/kmust/demo/ProjectOperDemo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/kmust/demo/ProjectOperDemo.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,6 +129,9 @@
       <workItem from="1606146243292" duration="2157000" />
       <workItem from="1606233010007" duration="2308000" />
       <workItem from="1606262024699" duration="1614000" />
+      <workItem from="1606321727254" duration="2357000" />
+      <workItem from="1606405298965" duration="2051000" />
+      <workItem from="1606434418893" duration="1712000" />
     </task>
     <servers />
   </component>
@@ -156,10 +159,14 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="690" height="261" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1605544537726" />
-    <state x="461" y="240" key="com.intellij.ide.util.TipDialog" timestamp="1606262841096">
+    <state x="461" y="240" key="com.intellij.ide.util.TipDialog" timestamp="1606434478127">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="461" y="240" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1606262841096" />
+    <state x="461" y="240" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1606434478127" />
+    <state x="472" y="45" key="refactoring.ChangeSignatureDialog" timestamp="1606435848499">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="472" y="45" key="refactoring.ChangeSignatureDialog/0.0.1536.824@0.0.1536.824" timestamp="1606435848499" />
     <state x="862" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1605657949287">
       <screen x="0" y="0" width="1536" height="824" />
     </state>

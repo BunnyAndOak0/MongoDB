@@ -2608,7 +2608,120 @@ i，m，x，s可以组合使用
        }
    ```
    
+   日期操作
    
+   查询devtest集合，查询哪些有生日的用户，并按照YYYY年mm月dd日  HH:MM:SS格式显示日期
+   
+   db.devtest.aggregate([{$match:{userbirth:{$ne:null}}},{$project:{自定义日期格式:{$dataToString:{formate:"%Y年%m月%d日 %H:%M:%S",data:"$userbirth"}}}}])
+   
+   ```java
+   /**
+        * @Author BunnyAndOak0
+        * @Description 查询devtest集合，查询哪些有生日的用户，并按照YYYY年mm月dd日  HH:MM:SS格式显示日期
+        * db.devtest.aggregate([{$match:{userbirth:{$ne:null},{$project:{自定义日期格式:{$dataToString:{formate:"%Y年%m月%d日 %H:%M:%S",data:"$userbirth"}}}}}}])
+        * 如果是直接在MongoDB中做日期的格式化处理，那么就是按照UTC时间来处理，会少八个小时，建议在程序中通过java.util.Date
+        * 来做日期的转换
+        **/
+       public void selectDocumentProjectDate(){
+           MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "devtest");
+           Document ne = new Document();
+           ne.put("$ne", null);
+   
+           Document birth = new Document();
+           birth.put("userbirth", ne);
+   
+           Document match = new Document();
+           match.put("$match", birth);
+   
+           Document format = new Document();
+           format.put("format", "%Y年%m月%d日 %H:%M:%S");
+           format.put("data", "$userbirth");
+   
+           Document dateToString = new Document();
+           dateToString.put("$dateToString", format);
+   
+           Document custoDate = new Document();
+           custoDate.put("自定义日期格式", dateToString);
+   
+           Document project = new Document();
+           project.put("$project", custoDate);
+   
+           List<Document> list = new ArrayList<Document>();
+           list.add(match);
+           list.add(project);
+           AggregateIterable iterable = collection.aggregate(list);
+           MongoCursor<Document> cursor = iterable.iterator();
+           while (cursor.hasNext()){
+               System.out.println(cursor.next());
+           }
+       }
+   ```
+   
+
+#### 分页查询
+
+使用skip和limit方法分页
+
+可以给定条件进行筛选
+
+```java
+    /**
+     * @Author BunnyAndOak0
+     * @Description 通过skip和limit方法实现分页
+     **/
+    public void selectDocumentByPageUseSkipAndLimit(int indecPage){
+        int page = (indecPage - 1) * 2;
+
+        MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+        Document condition = new Document("size", new Document("$ne", null));
+
+        long countNum = collection.countDocuments(condition);
+        System.out.println(countNum);
+        FindIterable iterable = collection.find(condition).skip(page).limit(2);
+        MongoCursor<Document> cursor = iterable.iterator();
+        while (cursor.hasNext()){
+            Document docu = cursor.next();
+            System.out.println(docu);
+        }
+    }
+```
+
+如果文档数据比较大 用limit和skip就比较慢，因为会做全文档的扫描，因此在数据量大的情况下，不建议使用limit和skip的方法来做分页
+
+优化分页查询
+
+使用条件判断替换skip方法（不支持跳页）
+
+```java
+    /**
+     * @Author BunnyAndOak0
+     * @Description 通过条件判断实现分页
+     **/
+    public void selectDocumentByPageCondition(int pageIndex, int pageSize, String lastId){
+        MongoCollection collection = MongoDBAuthPoolUtil.getCollection("develop", "dev");
+        Document condition = new Document("$ne", null);
+        long countNum = collection.countDocuments(condition);
+        System.out.println(countNum);
+
+        FindIterable findIterable = null;
+        if(pageIndex == 1){
+            //表示查询的是第一页
+            findIterable = collection.find(condition).limit(pageSize);
+        }else{
+            if(lastId != null){
+                condition.append("_id", new Document("$gt", new ObjectId(lastId)));
+                findIterable = collection.find(condition).limit(pageSize);
+            }
+        }
+        MongoCursor<Document> cursor = findIterable.iterator();
+        while (cursor.hasNext()){
+            Document docu = cursor.next();
+            System.out.println(docu);
+        }
+    }
+```
+
+
 
 
 
